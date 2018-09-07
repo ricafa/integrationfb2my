@@ -1,0 +1,44 @@
+CREATE TABLE ALTERACOES (
+    ID_ALTERACAO INTEGER NOT NULL,
+    TABELA VARCHAR(250),
+    ID INTEGER,
+    ACAO VARCHAR(30));
+
+ALTER TABLE ALTERACOES
+ADD CONSTRAINT PK_ALTERACOES
+PRIMARY KEY (ID_ALTERACAO);
+
+CREATE GENERATOR GEN_ALTERACOES_ID;
+
+create trigger alteracoes_bi for alteracoes
+active before insert position 0
+as
+begin
+  if (new.id_alteracao is null) then
+    new.id_alteracao = gen_id(gen_alteracoes_id,1);
+end;
+
+ALTER TABLE ALTERACOES
+    ADD DATA_CRIACAO TIMESTAMP,
+    ADD DATA_IMPORTADO TIMESTAMP;
+
+
+CREATE trigger tabela_clientes_bu0 for tabela_clientes
+active before update position 0
+AS
+begin
+    insert into alteracoes (tabela, id, acao, data_criacao)
+    Values ('tabela_clientes', new.cli_codigo,'update', current_timestamp);
+end;
+
+insert into alteracoes (tabela, id, acao, data_criacao)
+select 'tabela_clientes',cli_codigo,'insert',current_timestamp
+    from tabela_clientes;
+
+CREATE trigger tabela_clientes_ai0 for tabela_clientes
+active after insert position 0
+AS
+begin
+    insert into alteracoes (tabela, id, acao, data_criacao)
+    Values ('tabela_clientes', new.cli_codigo,'insert', current_timestamp);
+end;
