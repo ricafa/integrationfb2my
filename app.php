@@ -28,7 +28,7 @@ foreach($alteracoes as $alt){
 	$tabelas[] = $alt->TABELA;
 	$acoes[]   = $alt->ACAO;
 }
-
+//$tabelas[0] = strtoupper($tabelas[0]);
 $sqlids = "
 SELECT ID
 FROM ALTERACOES A
@@ -72,18 +72,21 @@ if(strtoupper($acoes[0]) == strtoupper('insert')){
 
 	//var_dump(		$resultFirebird	);
 	echo '<BR/>';
-	$insert  =  "INSERT INTO CLIENTES (".join(',',$mysql).") VALUES ";
+	$insert  =  "INSERT INTO clientes (".join(',',$mysql).") VALUES ";
 
 	foreach($resultFirebird as $val){
 		$data=[];
 		foreach ($firebird as $fir) {
 			if(isset($val->{trim($fir)})) {
-				if(empty($val->{trim($fir)})) {
-					$data[]='""';
-				}
-				else{
+				if(!empty($val->{trim($fir)})) {
 					$data[]= '"'.$val->{trim($fir)}.'"';
 				}
+				else{
+					$data[]='""';
+				}
+			}
+			else{
+				$data[]='""';
 			}
 		}
 		echo $insert.'('.join(',',$data).')';
